@@ -11,7 +11,7 @@ export const getLegends = async (req, res, next) => {
 
     if (approved !== 'all') {
       whereConditions.push(`approved = ?`);
-      params.push(approved === 'true');
+      params.push(approved === 'true' ? 1 : 0);
     }
 
     if (category !== 'all' && ['mangeur', 'fidele', 'drole', 'ambassadeur', 'autre'].includes(category)) {

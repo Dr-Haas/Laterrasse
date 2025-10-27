@@ -10,7 +10,7 @@ export const getCategories = async (req, res, next) => {
 
     if (visible !== 'all') {
       whereClause = 'WHERE visible = ?';
-      params.push(visible === 'true');
+      params.push(visible === 'true' ? 1 : 0);
     }
 
     const result = await query(
@@ -70,7 +70,7 @@ export const getItemsByCategory = async (req, res, next) => {
 
     if (available !== 'all') {
       whereClause += ' AND available = ?';
-      params.push(available === 'true');
+      params.push(available === 'true' ? 1 : 0);
     }
 
     const result = await query(

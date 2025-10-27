@@ -11,7 +11,8 @@ export const getPosts = async (req, res, next) => {
     
     if (approved !== 'all') {
       whereClause = 'WHERE p.approved = ?';
-      params.push(approved === 'true');
+      // MySQL attend 1/0 plutôt qu'un booléen JavaScript
+      params.push(approved === 'true' ? 1 : 0);
     }
     
     // Ajouter limit et offset À LA FIN (dans l'ordre des ? dans la requête)
