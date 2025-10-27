@@ -14,7 +14,9 @@ const pool = mysql.createPool({
   connectionLimit: 20,
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelay: 0
+  keepAliveInitialDelay: 0,
+  // SSL pour connexion sécurisée (OVH, etc.)
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
 });
 
 // Test de connexion

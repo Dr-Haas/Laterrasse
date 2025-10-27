@@ -5,8 +5,8 @@ const config = {
   host: 'hg101756-001.eu.clouddb.ovh.net',
   port: 35419,
   user: 'admin',
-  password: 'laterrass',
-  database: 'Laterrasse2025'
+  password: 'FytliApp2025',
+  database: 'Laterrasse'
 };
 
 async function testConnection() {
@@ -54,4 +54,3 @@ async function testConnection() {
 }
 
 testConnection();
-

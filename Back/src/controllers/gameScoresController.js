@@ -80,11 +80,15 @@ export const getAllScores = async (req, res, next) => {
 // Créer un nouveau score
 export const createScore = async (req, res, next) => {
   try {
-    const { playerName, score, difficulty, gameDuration } = req.body;
+    const { playerName, playerEmail, score, difficulty, gameDuration } = req.body;
 
     // Validation
     if (!playerName || playerName.trim().length === 0) {
       return res.status(400).json({ error: 'Le nom du joueur est requis' });
+    }
+
+    if (playerEmail && (!playerEmail.includes('@') || playerEmail.length < 3)) {
+      return res.status(400).json({ error: 'Email invalide' });
     }
 
     if (typeof score !== 'number' || score < 0) {
@@ -96,15 +100,21 @@ export const createScore = async (req, res, next) => {
     }
 
     const result = await query(
-      `INSERT INTO game_scores (player_name, score, difficulty, game_duration)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [playerName.trim(), score, difficulty, gameDuration || null]
+      `INSERT INTO game_scores (player_name, player_email, score, difficulty, game_duration)
+       VALUES (?, ?, ?, ?, ?)`,
+      [playerName.trim(), playerEmail?.trim() || null, score, difficulty, gameDuration || null]
     );
 
     res.status(201).json({ 
       message: 'Score enregistré',
-      data: result.rows[0] 
+      data: {
+        id: result.rows.insertId,
+        playerName: playerName.trim(),
+        playerEmail: playerEmail?.trim() || null,
+        score,
+        difficulty,
+        gameDuration: gameDuration || null
+      }
     });
   } catch (error) {
     next(error);

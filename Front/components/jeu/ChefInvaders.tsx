@@ -44,6 +44,13 @@ export function ChefInvaders() {
   const [highScore, setHighScore] = useState(0)
   const [level, setLevel] = useState(1)
   
+  // États pour la soumission du score
+  const [showScoreForm, setShowScoreForm] = useState(false)
+  const [playerName, setPlayerName] = useState('')
+  const [playerEmail, setPlayerEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState('')
+  
   const gameLoopRef = useRef<number>(0)
   const keysPressed = useRef<Set<string>>(new Set())
   
@@ -328,6 +335,54 @@ export function ChefInvaders() {
     }
   }, [gameState])
 
+  // Fonction pour soumettre le score
+  const submitScore = async () => {
+    if (!playerName.trim()) {
+      setSubmitMessage('❌ Veuillez entrer un nom')
+      return
+    }
+
+    if (!playerEmail.trim() || !playerEmail.includes('@')) {
+      setSubmitMessage('❌ Veuillez entrer un email valide')
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitMessage('')
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/game-scores`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playerName: playerName.trim(),
+          playerEmail: playerEmail.trim(),
+          score: score,
+          difficulty: level >= 5 ? 'hard' : level >= 3 ? 'medium' : 'easy',
+          gameDuration: Math.floor(Date.now() / 1000) // Timestamp approximatif
+        }),
+      })
+
+      if (response.ok) {
+        setSubmitMessage('✅ Score enregistré avec succès !')
+        setPlayerName('')
+        setPlayerEmail('')
+        setTimeout(() => {
+          setShowScoreForm(false)
+          setSubmitMessage('')
+        }, 2000)
+      } else {
+        setSubmitMessage('❌ Erreur lors de l\'enregistrement')
+      }
+    } catch (error) {
+      setSubmitMessage('❌ Erreur de connexion au serveur')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   // Gestion des contrôles tactiles
   const handleTouchButton = (action: 'left' | 'right' | 'shoot', isPressed: boolean) => {
     if (action === 'left' || action === 'right') {
@@ -346,7 +401,7 @@ export function ChefInvaders() {
   return (
     <div className="flex flex-col items-center gap-4 pb-8">
       {/* Game Boy Container */}
-      <div style={{padding: "20px"}} className="relative bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 rounded-3xl p-6 shadow-2xl max-w-md mx-auto border-8 border-purple-700">
+      <div style={{padding: "20pxgit a"}} className="relative bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 rounded-3xl p-6 shadow-2xl max-w-md mx-auto border-8 border-purple-700">
         {/* Logo Game Boy Style */}
         <div className="text-center mb-3">
           <h2 className="text-2xl font-bold text-purple-900 tracking-wider">
@@ -356,7 +411,7 @@ export function ChefInvaders() {
         </div>
 
         {/* Screen Container */}
-        <div className="bg-gradient-to-b from-slate-700 to-slate-800 rounded-2xl p-4 mb-6 shadow-inner">
+        <div className="bg-gradient-to-b from-slate-700 to-slate-800 rounded-2xl p-4 mb-6 shadow-inner" style={{padding: "10px"}}>
           {/* Power LED */}
           <div className="flex items-center gap-2 mb-2">
             <div className={`w-2 h-2 rounded-full ${gameState === 'playing' ? 'bg-red-500 animate-pulse' : 'bg-red-900'}`}></div>
@@ -389,10 +444,11 @@ export function ChefInvaders() {
                 <div className="text-center text-white space-y-4 p-4">
                   <h3 className="text-2xl font-bold mb-2">🧑‍🍳 Chef Invaders 🔪</h3>
                   <div className="space-y-1 text-sm">
-                    <p>D-Pad : Déplacer</p>
+                    <p style={{margin: "10px 0"}}>D-Pad : Déplacer</p>
                     <p>Bouton A : Tirer</p>
                   </div>
                   <button 
+                    style={{padding: "5px 10px", margin: "10px 0"}}
                     onClick={startGame}
                     className="mt-4 px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-colors"
                   >
@@ -427,8 +483,8 @@ export function ChefInvaders() {
 
             {/* Overlay Game Over */}
             {gameState === 'gameOver' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-                <div className="text-center text-white space-y-3 p-4">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/90 overflow-y-auto">
+                <div className="text-center text-white space-y-3 p-4 max-w-md">
                   <h3 className="text-2xl font-bold text-red-500">GAME OVER!</h3>
                   <div className="text-lg space-y-1" style={{margin: "10px 0"}}>
                     <p style={{margin: "10px 0"}}>Score: <span className="text-yellow-400 font-bold">{score}</span></p>
@@ -437,6 +493,79 @@ export function ChefInvaders() {
                       <p className="text-purple-400 font-bold animate-pulse text-sm">🏆 RECORD ! 🏆</p>
                     )}
                   </div>
+
+                  {/* Formulaire d'enregistrement du score */}
+                  {!showScoreForm ? (
+                    <div className="space-y-3" style={{margin: "15px 0"}}>
+                      <button
+                        onClick={() => setShowScoreForm(true)}
+                        className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm w-full"
+                      >
+                        💾 Enregistrer mon score
+                      </button>
+                      <p className="text-xs text-gray-400">Entrez dans le tableau des meilleurs scores !</p>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-800 p-4 rounded-lg space-y-3" style={{margin: "15px 0"}}>
+                      <h4 className="text-lg font-bold text-green-400">📝 Enregistrer le score</h4>
+                      
+                      <div className="space-y-2 text-left">
+                        <div>
+                          <label className="block text-xs text-gray-300 mb-1">Nom :</label>
+                          <input
+                            type="text"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                            placeholder="Votre nom"
+                            maxLength={50}
+                            className="w-full px-3 py-2 bg-slate-700 text-white rounded border border-slate-600 focus:border-green-500 focus:outline-none text-sm"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-xs text-gray-300 mb-1">Email :</label>
+                          <input
+                            type="email"
+                            value={playerEmail}
+                            onChange={(e) => setPlayerEmail(e.target.value)}
+                            placeholder="votre@email.com"
+                            className="w-full px-3 py-2 bg-slate-700 text-white rounded border border-slate-600 focus:border-green-500 focus:outline-none text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {submitMessage && (
+                        <p className={`text-sm ${submitMessage.includes('✅') ? 'text-green-400' : 'text-red-400'}`}>
+                          {submitMessage}
+                        </p>
+                      )}
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={submitScore}
+                          disabled={isSubmitting}
+                          className={`flex-1 px-4 py-2 rounded-lg font-bold text-sm ${
+                            isSubmitting 
+                              ? 'bg-gray-600 cursor-not-allowed' 
+                              : 'bg-green-600 hover:bg-green-700'
+                          } text-white`}
+                        >
+                          {isSubmitting ? '⏳ Envoi...' : '✅ Valider'}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowScoreForm(false)
+                            setSubmitMessage('')
+                          }}
+                          disabled={isSubmitting}
+                          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-bold text-sm"
+                        >
+                          ✖️
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex gap-3 justify-center" style={{margin: "10px 0"}}>
                     <button 
                       style={{padding: "10px 20px"}}
@@ -538,18 +667,18 @@ export function ChefInvaders() {
         </div>
 
         {/* Start/Select Buttons */}
-        <div className="flex justify-center gap-4 mt-6">
+        <div className="flex justify-center gap-4 mt-6" style={{margin: "10px 0"}}>
           <button
             onClick={() => gameState === 'menu' && startGame()}
             className="px-6 py-2 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-full text-xs text-white font-bold shadow-md transform rotate-[-10deg] select-none"
-            style={{ touchAction: 'none' }}
+            style={{ touchAction: 'none', padding: "2px 5px"}}
           >
             START
           </button>
           <button
             onClick={() => setGameState('menu')}
             className="px-6 py-2 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-full text-xs text-white font-bold shadow-md transform rotate-[-10deg] select-none"
-            style={{ touchAction: 'none' }}
+            style={{ touchAction: 'none', padding: "2px 5px"}}
           >
             SELECT
           </button>
