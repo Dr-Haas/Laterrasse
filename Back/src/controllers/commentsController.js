@@ -4,8 +4,12 @@ import { query } from '../config/database.js';
 export const getComments = async (req, res, next) => {
   try {
     const { postId } = req.params;
-    const { page = 1, limit = 50 } = req.query;
-    const offset = (page - 1) * limit;
+    const { page = '1', limit = '50' } = req.query;
+    
+    // Convertir en nombres valides pour MySQL
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const offset = (isNaN(pageNum) ? 1 : pageNum - 1) * (isNaN(limitNum) ? 50 : limitNum);
 
     const result = await query(
       `SELECT 
@@ -16,7 +20,7 @@ export const getComments = async (req, res, next) => {
       WHERE c.post_id = ?
       ORDER BY c.created_at ASC
       LIMIT ? OFFSET ?`,
-      [postId, limit, offset]
+      [postId, isNaN(limitNum) ? 50 : limitNum, isNaN(offset) ? 0 : offset]
     );
 
     res.json({ data: result.rows });
@@ -44,24 +48,24 @@ export const createComment = async (req, res, next) => {
 
     const result = await query(
       `INSERT INTO comments (user_id, post_id, content)
-       VALUES (?, ?, ?)
-       `,
+       VALUES (?, ?, ?)`,
       [userId, postId, content]
     );
 
-    const comment = result.rows[0];
-
-    // Récupérer les infos utilisateur
-    const userResult = await query(
-      'SELECT id, username, email, avatar_url FROM users WHERE id = ?',
-      [userId]
+    // MySQL : récupérer le commentaire créé avec l'insertId
+    const insertId = result.rows.insertId;
+    const commentResult = await query(
+      `SELECT 
+        c.id, c.content, c.created_at, c.updated_at,
+        u.id as user_id, u.username, u.email, u.avatar_url
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.id = ?`,
+      [insertId]
     );
 
     res.status(201).json({
-      data: {
-        ...comment,
-        user: userResult.rows[0]
-      }
+      data: commentResult.rows[0]
     });
   } catch (error) {
     next(error);

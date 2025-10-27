@@ -123,14 +123,20 @@ export const createCategory = async (req, res, next) => {
 
     const result = await query(
       `INSERT INTO menu_categories (name, slug, description, icon, display_order)
-       VALUES (?, ?, ?, ?, ?)
-       `,
+       VALUES (?, ?, ?, ?, ?)`,
       [name, slug, description || null, icon || null, displayOrder || 0]
+    );
+
+    // MySQL : récupérer la catégorie créée avec l'insertId
+    const insertId = result.rows.insertId;
+    const categoryResult = await query(
+      'SELECT * FROM menu_categories WHERE id = ?',
+      [insertId]
     );
 
     res.status(201).json({
       message: 'Catégorie créée',
-      data: result.rows[0]
+      data: categoryResult.rows[0]
     });
   } catch (error) {
     next(error);
@@ -174,9 +180,16 @@ export const createItem = async (req, res, next) => {
       ]
     );
 
+    // MySQL : récupérer l'item créé avec l'insertId
+    const insertId = result.rows.insertId;
+    const itemResult = await query(
+      'SELECT * FROM menu_items WHERE id = ?',
+      [insertId]
+    );
+
     res.status(201).json({
       message: 'Item créé',
-      data: result.rows[0]
+      data: itemResult.rows[0]
     });
   } catch (error) {
     next(error);

@@ -36,8 +36,12 @@ export const getTopScores = async (req, res, next) => {
 // Obtenir tous les scores avec pagination
 export const getAllScores = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, difficulty = 'all' } = req.query;
-    const offset = (page - 1) * limit;
+    const { page = '1', limit = '20', difficulty = 'all' } = req.query;
+    
+    // Convertir en nombres valides pour MySQL
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const offset = (isNaN(pageNum) ? 1 : pageNum - 1) * (isNaN(limitNum) ? 20 : limitNum);
 
     let whereClause = '';
     const params = [];
@@ -47,7 +51,9 @@ export const getAllScores = async (req, res, next) => {
       params.push(difficulty);
     }
     
-    params.push(parseInt(limit), parseInt(offset));
+    // MySQL2 veut des nombres valides
+    params.push(isNaN(limitNum) ? 20 : limitNum);
+    params.push(isNaN(offset) ? 0 : offset);
 
     const result = await query(
       `SELECT 
@@ -72,8 +78,8 @@ export const getAllScores = async (req, res, next) => {
     res.json({
       data: result.rows,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: isNaN(pageNum) ? 1 : pageNum,
+        limit: isNaN(limitNum) ? 20 : limitNum,
         total,
         hasMore
       }

@@ -100,26 +100,30 @@ export const createPost = async (req, res, next) => {
       imageUrl = `/uploads/${req.file.filename}`;
     }
 
+    // MySQL attend 1/0 au lieu de true/false
+    const approved = req.user.role === 'admin' ? 1 : 0;
+
     const result = await query(
       `INSERT INTO posts (user_id, message, image_url, approved)
-       VALUES (?, ?, ?, ?)
-       `,
-      [userId, message, imageUrl, req.user.role === 'admin']
+       VALUES (?, ?, ?, ?)`,
+      [userId, message, imageUrl, approved]
     );
 
-    const post = result.rows[0];
-
-    // Récupérer les infos utilisateur
-    const userResult = await query(
-      'SELECT id, username, email, avatar_url FROM users WHERE id = ?',
-      [userId]
+    // MySQL : récupérer le post créé avec l'insertId
+    const insertId = result.rows.insertId;
+    const postResult = await query(
+      `SELECT 
+        p.id, p.message, p.image_url, p.likes_count, p.comments_count, 
+        p.approved, p.created_at, p.updated_at,
+        u.id as user_id, u.username, u.email, u.avatar_url
+      FROM posts p
+      JOIN users u ON p.user_id = u.id
+      WHERE p.id = ?`,
+      [insertId]
     );
 
     res.status(201).json({
-      data: {
-        ...post,
-        user: userResult.rows[0]
-      }
+      data: postResult.rows[0]
     });
   } catch (error) {
     next(error);
