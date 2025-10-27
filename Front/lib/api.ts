@@ -80,6 +80,10 @@ export const api = {
         body: data,
         headers: {}, // Pas de Content-Type pour FormData
       }),
+    vote: (id: string) =>
+      apiRequest(`/api/legends/${id}/vote`, {
+        method: 'POST',
+      }),
   },
   
   // Auth
