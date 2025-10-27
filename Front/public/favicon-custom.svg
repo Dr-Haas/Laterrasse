@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Fond dégradé bleu vers jaune -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00AEEF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD100;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="kebabGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#D2691E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B4513;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Cercle de fond -->
+  <circle cx="50" cy="50" r="48" fill="url(#grad)"/>
+  
+  <!-- Pain du haut -->
+  <ellipse cx="50" cy="30" rx="30" ry="8" fill="#D2691E"/>
+  
+  <!-- Viande kebab -->
+  <rect x="20" y="32" width="60" height="8" fill="url(#kebabGrad)" rx="2"/>
+  <rect x="20" y="42" width="60" height="8" fill="url(#kebabGrad)" rx="2"/>
+  <rect x="20" y="52" width="60" height="8" fill="url(#kebabGrad)" rx="2"/>
+  
+  <!-- Salade -->
+  <ellipse cx="50" cy="65" rx="28" ry="5" fill="#90EE90"/>
+  
+  <!-- Pain du bas -->
+  <ellipse cx="50" cy="75" rx="32" ry="10" fill="#DEB887"/>
+  
+  <!-- Lettre T stylisée -->
+  <text x="50" y="90" font-family="Impact, Arial Black, sans-serif" font-size="35" font-weight="bold" fill="#E6322D" text-anchor="middle">T</text>
+</svg>
+

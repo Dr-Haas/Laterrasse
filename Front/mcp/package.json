@@ -1,0 +1,10 @@
+{
+  "name": "laterrasse-mcp-servers",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Serveurs MCP personnalisés pour La Terrasse",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
+
