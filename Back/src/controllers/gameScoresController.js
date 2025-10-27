@@ -6,12 +6,14 @@ export const getTopScores = async (req, res, next) => {
     const { difficulty = 'all', limit = 10 } = req.query;
 
     let whereClause = '';
-    const params = [limit];
+    const params = [];
     
     if (difficulty !== 'all' && ['easy', 'medium', 'hard'].includes(difficulty)) {
-      whereClause = 'WHERE difficulty = $2';
+      whereClause = 'WHERE difficulty = ?';
       params.push(difficulty);
     }
+    
+    params.push(parseInt(limit));
 
     const result = await query(
       `SELECT 
@@ -19,7 +21,7 @@ export const getTopScores = async (req, res, next) => {
       FROM game_scores
       ${whereClause}
       ORDER BY score DESC, created_at DESC
-      LIMIT $1`,
+      LIMIT ?`,
       params
     );
 
@@ -36,12 +38,14 @@ export const getAllScores = async (req, res, next) => {
     const offset = (page - 1) * limit;
 
     let whereClause = '';
-    const params = [limit, offset];
+    const params = [];
     
     if (difficulty !== 'all' && ['easy', 'medium', 'hard'].includes(difficulty)) {
-      whereClause = 'WHERE difficulty = $3';
+      whereClause = 'WHERE difficulty = ?';
       params.push(difficulty);
     }
+    
+    params.push(parseInt(limit), parseInt(offset));
 
     const result = await query(
       `SELECT 
@@ -49,14 +53,14 @@ export const getAllScores = async (req, res, next) => {
       FROM game_scores
       ${whereClause}
       ORDER BY score DESC, created_at DESC
-      LIMIT $1 OFFSET $2`,
+      LIMIT ? OFFSET ?`,
       params
     );
 
     // Compter le total
     const countParams = difficulty !== 'all' ? [difficulty] : [];
     const countResult = await query(
-      `SELECT COUNT(*) FROM game_scores ${whereClause}`,
+      `SELECT COUNT(*) AS count FROM game_scores ${whereClause}`,
       countParams
     );
 
@@ -128,11 +132,11 @@ export const getStats = async (req, res, next) => {
       `SELECT 
         COUNT(*) as total_games,
         MAX(score) as highest_score,
-        AVG(score)::INTEGER as average_score,
+        CAST(AVG(score) AS SIGNED) as average_score,
         difficulty,
-        COUNT(*) FILTER (WHERE difficulty = 'easy') as easy_games,
-        COUNT(*) FILTER (WHERE difficulty = 'medium') as medium_games,
-        COUNT(*) FILTER (WHERE difficulty = 'hard') as hard_games
+        SUM(CASE WHEN difficulty = 'easy' THEN 1 ELSE 0 END) as easy_games,
+        SUM(CASE WHEN difficulty = 'medium' THEN 1 ELSE 0 END) as medium_games,
+        SUM(CASE WHEN difficulty = 'hard' THEN 1 ELSE 0 END) as hard_games
       FROM game_scores
       GROUP BY difficulty
       ORDER BY difficulty`
@@ -143,8 +147,8 @@ export const getStats = async (req, res, next) => {
       `SELECT 
         COUNT(*) as total_games,
         MAX(score) as highest_score,
-        AVG(score)::INTEGER as average_score,
-        AVG(game_duration)::INTEGER as average_duration
+        CAST(AVG(score) AS SIGNED) as average_score,
+        CAST(AVG(game_duration) AS SIGNED) as average_duration
       FROM game_scores`
     );
 

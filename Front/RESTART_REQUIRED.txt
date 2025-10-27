@@ -1,0 +1,12 @@
+⚠️  REDÉMARRAGE REQUIS
+
+Le fichier .env.local a été modifié pour pointer vers le backend Render.
+
+Pour que les changements prennent effet :
+
+1. Dans votre terminal où tourne `npm run dev`, appuyez sur Ctrl+C
+2. Relancez : npm run dev
+3. Rafraîchissez votre navigateur (F5)
+
+Les données devraient maintenant charger depuis https://laterrasse.onrender.com ! 🚀
+
