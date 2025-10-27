@@ -14,7 +14,7 @@ export const authenticateToken = async (req, res, next) => {
     
     // Récupérer les infos de l'utilisateur
     const result = await query(
-      'SELECT id, email, username, role FROM users WHERE id = $1',
+      'SELECT id, email, username, role FROM users WHERE id = ?',
       [decoded.userId]
     );
 
@@ -50,7 +50,7 @@ export const optionalAuth = async (req, res, next) => {
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const result = await query(
-        'SELECT id, email, username, role FROM users WHERE id = $1',
+        'SELECT id, email, username, role FROM users WHERE id = ?',
         [decoded.userId]
       );
       
