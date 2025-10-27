@@ -33,6 +33,9 @@ export const getLegends = async (req, res, next) => {
     params.push(safeLimitNum);
     params.push(offset);
 
+    // DEBUG : Logger les paramètres avant la requête
+    console.log('🔍 DEBUG getLegends - params:', params.map(p => ({ value: p, type: typeof p })));
+
     const result = await query(
       `SELECT 
         id, name, anecdote, category, image_url, approved, votes_count, created_at, updated_at

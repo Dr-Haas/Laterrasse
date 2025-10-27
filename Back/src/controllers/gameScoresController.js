@@ -18,6 +18,9 @@ export const getTopScores = async (req, res, next) => {
     const safeLimitNum = (isNaN(limitNum) || limitNum <= 0) ? 10 : limitNum;
     params.push(safeLimitNum);
 
+    // DEBUG : Logger les paramètres avant la requête
+    console.log('🔍 DEBUG getTopScores - params:', params.map(p => ({ value: p, type: typeof p })));
+
     const result = await query(
       `SELECT 
         id, player_name, score, difficulty, game_duration, created_at

@@ -25,6 +25,9 @@ export const getPosts = async (req, res, next) => {
     params.push(safeLimitNum);
     params.push(offset);
 
+    // DEBUG : Logger les paramètres avant la requête
+    console.log('🔍 DEBUG getPosts - params:', params.map(p => ({ value: p, type: typeof p })));
+
     const result = await query(
       `SELECT 
         p.id, p.message, p.image_url, p.likes_count, p.comments_count, 
