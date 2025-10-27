@@ -7,12 +7,15 @@ export const getPosts = async (req, res, next) => {
     const offset = (page - 1) * limit;
 
     let whereClause = '';
-    const params = [limit, offset];
+    const params = [];
     
     if (approved !== 'all') {
       whereClause = 'WHERE p.approved = ?';
       params.push(approved === 'true');
     }
+    
+    // Ajouter limit et offset À LA FIN (dans l'ordre des ? dans la requête)
+    params.push(parseInt(limit), parseInt(offset));
 
     const result = await query(
       `SELECT 

@@ -28,12 +28,17 @@ export const register = async (req, res, next) => {
     // Créer l'utilisateur
     const result = await query(
       `INSERT INTO users (email, password_hash, username) 
-       VALUES (?, ?, ?) 
-       RETURNING id, email, username, role, created_at`,
+       VALUES (?, ?, ?)`,
       [email, passwordHash, username || null]
     );
 
-    const user = result.rows[0];
+    // MySQL : récupérer l'utilisateur créé
+    const userResult = await query(
+      'SELECT id, email, username, role, created_at FROM users WHERE id = ?',
+      [result.rows.insertId]
+    );
+    
+    const user = userResult.rows[0];
 
     // Générer un token JWT
     const token = jwt.sign(
