@@ -1,0 +1,9 @@
+1:"$Sreact.fragment"
+2:I[51442,["/_next/static/chunks/386c156e8cf363fe.js","/_next/static/chunks/228b7d222385fab0.js","/_next/static/chunks/d6d303d2ed43781f.js","/_next/static/chunks/98cfdbcf0e5b088e.js"],"HeroSection"]
+3:I[25835,["/_next/static/chunks/386c156e8cf363fe.js","/_next/static/chunks/228b7d222385fab0.js","/_next/static/chunks/d6d303d2ed43781f.js","/_next/static/chunks/98cfdbcf0e5b088e.js"],"MehmetQuote"]
+4:I[93563,["/_next/static/chunks/386c156e8cf363fe.js","/_next/static/chunks/228b7d222385fab0.js","/_next/static/chunks/d6d303d2ed43781f.js","/_next/static/chunks/98cfdbcf0e5b088e.js"],"SpiritCards"]
+5:I[50952,["/_next/static/chunks/386c156e8cf363fe.js","/_next/static/chunks/228b7d222385fab0.js","/_next/static/chunks/d6d303d2ed43781f.js","/_next/static/chunks/98cfdbcf0e5b088e.js"],"CallToAction"]
+6:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/247eb132b7f7b574.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+0:{"buildId":"c50RJ8rKKzzwZlbeSMM5J","rsc":["$","$1","c",{"children":[[["$","$L2",null,{}],["$","$L3",null,{}],["$","$L4",null,{}],["$","$L5",null,{}]],[["$","script","script-0",{"src":"/_next/static/chunks/98cfdbcf0e5b088e.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"loading":null,"isPartial":false}
+8:null

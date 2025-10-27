@@ -180,7 +180,7 @@ export function Header() {
             transition={{ duration: 0.3 }}
             className="fixed top-[72px] left-0 right-0 lg:hidden bg-terrasse-black border-t border-terrasse-yellow/30 shadow-2xl z-50 max-h-[calc(100vh-72px)] overflow-y-auto"
           >
-                <nav className="container mx-auto px-6 py-6" aria-label="Navigation mobile">
+                <nav className="container mx-auto px-6 py-6" aria-label="Navigation mobile" style={{padding: "10px"}}>
                   <ul className="flex flex-col gap-2">
                     {NAV_LINKS.map((link, index) => {
                       const isActive = pathname === link.href

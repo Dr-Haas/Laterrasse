@@ -1,26 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Export statique pour FTP
+  output: 'export',
+  
+  // Nom du dossier de build
+  distDir: 'laterrasseFront',
+  
+  // Désactiver l'optimisation d'images pour l'export statique
   images: {
-    // Configuration pour les images du menu
-    formats: ["image/avif", "image/webp"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Ajouter 90 pour la qualité du header
-    qualities: [75, 90],
-    
-    // Si tu veux utiliser des images d'Unsplash ou autre en attendant tes photos
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "unsplash.com",
-      },
-    ],
+    unoptimized: true,
   },
+  
+  // Optionnel : définir le basePath si votre site n'est pas à la racine du domaine
+  // basePath: '/laterrasse',
+  
+  // Garder un trailing slash pour la compatibilité serveur
+  trailingSlash: true,
 };
 
 export default nextConfig;

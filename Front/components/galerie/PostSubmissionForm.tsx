@@ -64,7 +64,7 @@ export function PostSubmissionForm() {
     if (!file) return
 
     // Validation du fichier
-    if (!GALLERY_CONFIG.allowedFormats.includes(file.type)) {
+    if (!GALLERY_CONFIG.allowedFormats.includes(file.type as any)) {
       setErrors({
         ...errors,
         image: "Format non supporté. Utilisez JPG, PNG ou WEBP.",

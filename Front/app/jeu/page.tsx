@@ -16,7 +16,7 @@ export default function JeuPage() {
             🔪 Chef Invaders 🔪
           </h1>
           <p className="text-slate-300 text-lg max-w-2xl mx-auto" style={{margin: "10px 0"}}>
-            Incarnez le chef et défendez votre cuisine contre l'invasion des ingrédients !
+            Incarnez le chef MehMet et défendez votre cuisine contre l'invasion des ingrédients !
             Utilisez les flèches pour vous déplacer et la barre d'espace pour lancer vos couteaux.
           </p>
         </div>
