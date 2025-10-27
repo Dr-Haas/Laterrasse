@@ -3,8 +3,12 @@ import { query } from '../config/database.js';
 // Obtenir tous les posts (galerie)
 export const getPosts = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, approved = 'true' } = req.query;
-    const offset = (page - 1) * limit;
+    const { page = '1', limit = '20', approved = 'true' } = req.query;
+    
+    // Convertir en nombres valides pour MySQL
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const offset = (isNaN(pageNum) ? 1 : pageNum - 1) * (isNaN(limitNum) ? 20 : limitNum);
 
     let whereClause = '';
     const params = [];
@@ -15,8 +19,9 @@ export const getPosts = async (req, res, next) => {
       params.push(approved === 'true' ? 1 : 0);
     }
     
-    // Ajouter limit et offset À LA FIN (dans l'ordre des ? dans la requête)
-    params.push(parseInt(limit), parseInt(offset));
+    // Ajouter limit et offset À LA FIN (MySQL2 veut des nombres valides)
+    params.push(isNaN(limitNum) ? 20 : limitNum);
+    params.push(isNaN(offset) ? 0 : offset);
 
     const result = await query(
       `SELECT 
@@ -43,8 +48,8 @@ export const getPosts = async (req, res, next) => {
     res.json({
       data: result.rows,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: isNaN(pageNum) ? 1 : pageNum,
+        limit: isNaN(limitNum) ? 20 : limitNum,
         total,
         hasMore
       }

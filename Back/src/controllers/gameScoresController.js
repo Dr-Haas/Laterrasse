@@ -3,7 +3,7 @@ import { query } from '../config/database.js';
 // Obtenir les meilleurs scores
 export const getTopScores = async (req, res, next) => {
   try {
-    const { difficulty = 'all', limit = 10 } = req.query;
+    const { difficulty = 'all', limit = '10' } = req.query;
 
     let whereClause = '';
     const params = [];
@@ -13,7 +13,9 @@ export const getTopScores = async (req, res, next) => {
       params.push(difficulty);
     }
     
-    params.push(parseInt(limit));
+    // MySQL2 veut un nombre valide, pas NaN
+    const limitNum = parseInt(limit, 10);
+    params.push(isNaN(limitNum) ? 10 : limitNum);
 
     const result = await query(
       `SELECT 
