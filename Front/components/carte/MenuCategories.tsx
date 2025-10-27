@@ -61,10 +61,10 @@ export function MenuCategories() {
       try {
         setLoading(true)
         const data = await api.menu.getAll()
-        setMenuData(data.categories || [])
+        setMenuData(data.data || [])
         // Définir la première catégorie comme active si elle existe
-        if (data.categories && data.categories.length > 0) {
-          setActiveCategory(data.categories[0].slug)
+        if (data.data && data.data.length > 0) {
+          setActiveCategory(data.data[0].slug)
         }
       } catch (err) {
         console.error("Erreur lors du chargement du menu:", err)

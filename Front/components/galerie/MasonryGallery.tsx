@@ -70,7 +70,7 @@ export function MasonryGallery() {
         setLoading(true)
         const data = await api.posts.getAll()
         // Filtrer uniquement les posts approuvés et convertir
-        const apiPosts = data.posts?.filter((p: APIPost) => p.approved) || []
+        const apiPosts = data.data?.filter((p: APIPost) => p.approved) || []
         const convertedPosts = apiPosts.map(convertAPIPost)
         setPosts(convertedPosts)
       } catch (err) {
