@@ -27,9 +27,26 @@ const PORT = process.env.PORT || 3001;
 // Middlewares globaux
 // ========================================
 
-// CORS
+// CORS - Configuration pour accepter plusieurs origins
+const allowedOrigins = [
+  'http://localhost:3000',           // Frontend local
+  'https://laterrasse.dikio.fr',     // Frontend production
+  process.env.FRONTEND_URL           // Variable d'environnement custom
+].filter(Boolean); // Retire les valeurs null/undefined
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Autoriser les requêtes sans origin (mobile apps, Postman, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Vérifier si l'origin est dans la liste autorisée
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️  Origin non autorisée: ${origin}`);
+      callback(new Error('Non autorisé par CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
