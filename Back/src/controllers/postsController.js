@@ -5,10 +5,12 @@ export const getPosts = async (req, res, next) => {
   try {
     const { page = '1', limit = '20', approved = 'true' } = req.query;
     
-    // Convertir en nombres valides pour MySQL
+    // Convertir en nombres valides pour MySQL - FORCER les valeurs par défaut
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
-    const offset = (isNaN(pageNum) ? 1 : pageNum - 1) * (isNaN(limitNum) ? 20 : limitNum);
+    const safePageNum = (isNaN(pageNum) || pageNum <= 0) ? 1 : pageNum;
+    const safeLimitNum = (isNaN(limitNum) || limitNum <= 0) ? 20 : limitNum;
+    const offset = (safePageNum - 1) * safeLimitNum;
 
     let whereClause = '';
     const params = [];
@@ -19,9 +21,9 @@ export const getPosts = async (req, res, next) => {
       params.push(approved === 'true' ? 1 : 0);
     }
     
-    // Ajouter limit et offset À LA FIN (MySQL2 veut des nombres valides)
-    params.push(isNaN(limitNum) ? 20 : limitNum);
-    params.push(isNaN(offset) ? 0 : offset);
+    // Ajouter limit et offset À LA FIN - utiliser les valeurs sécurisées
+    params.push(safeLimitNum);
+    params.push(offset);
 
     const result = await query(
       `SELECT 
@@ -48,8 +50,8 @@ export const getPosts = async (req, res, next) => {
     res.json({
       data: result.rows,
       pagination: {
-        page: isNaN(pageNum) ? 1 : pageNum,
-        limit: isNaN(limitNum) ? 20 : limitNum,
+        page: safePageNum,
+        limit: safeLimitNum,
         total,
         hasMore
       }

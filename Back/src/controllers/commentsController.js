@@ -6,10 +6,12 @@ export const getComments = async (req, res, next) => {
     const { postId } = req.params;
     const { page = '1', limit = '50' } = req.query;
     
-    // Convertir en nombres valides pour MySQL
+    // Convertir en nombres valides pour MySQL - FORCER les valeurs par défaut
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
-    const offset = (isNaN(pageNum) ? 1 : pageNum - 1) * (isNaN(limitNum) ? 50 : limitNum);
+    const safePageNum = (isNaN(pageNum) || pageNum <= 0) ? 1 : pageNum;
+    const safeLimitNum = (isNaN(limitNum) || limitNum <= 0) ? 50 : limitNum;
+    const offset = (safePageNum - 1) * safeLimitNum;
 
     const result = await query(
       `SELECT 
@@ -20,7 +22,7 @@ export const getComments = async (req, res, next) => {
       WHERE c.post_id = ?
       ORDER BY c.created_at ASC
       LIMIT ? OFFSET ?`,
-      [postId, isNaN(limitNum) ? 50 : limitNum, isNaN(offset) ? 0 : offset]
+      [postId, safeLimitNum, offset]
     );
 
     res.json({ data: result.rows });
