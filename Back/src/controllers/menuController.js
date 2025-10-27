@@ -32,7 +32,7 @@ export const getFullMenu = async (req, res, next) => {
     // Récupérer les catégories
     const categoriesResult = await query(
       `SELECT * FROM menu_categories
-       WHERE visible = true
+       WHERE visible = 1
        ORDER BY display_order ASC`
     );
 
@@ -40,7 +40,7 @@ export const getFullMenu = async (req, res, next) => {
     const menuPromises = categoriesResult.rows.map(async (category) => {
       const itemsResult = await query(
         `SELECT * FROM menu_items
-         WHERE category_id = ? AND available = true
+         WHERE category_id = ? AND available = 1
          ORDER BY display_order ASC, name ASC`,
         [category.id]
       );
@@ -170,7 +170,7 @@ export const createItem = async (req, res, next) => {
         imageUrl,
         allergens || null,
         displayOrder || 0,
-        popular || false
+        popular ? 1 : 0  // MySQL attend 1/0 au lieu de true/false
       ]
     );
 

@@ -34,7 +34,7 @@ export const getPosts = async (req, res, next) => {
     // Compter le total
     const countResult = await query(
       `SELECT COUNT(*) AS count FROM posts p ${whereClause}`,
-      approved !== 'all' ? [approved === 'true'] : []
+      approved !== 'all' ? [approved === 'true' ? 1 : 0] : []
     );
 
     const total = parseInt(countResult.rows[0].count);
@@ -184,8 +184,9 @@ export const approvePost = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    // MySQL attend 1 au lieu de true
     const result = await query(
-      'UPDATE posts SET approved = true WHERE id = ? ',
+      'UPDATE posts SET approved = 1 WHERE id = ? ',
       [id]
     );
 

@@ -104,7 +104,8 @@ export const createLegend = async (req, res, next) => {
     }
 
     // Les admins peuvent créer des légendes déjà approuvées
-    const approved = req.user && req.user.role === 'admin';
+    // MySQL attend 1/0 au lieu de true/false
+    const approved = (req.user && req.user.role === 'admin') ? 1 : 0;
 
     const result = await query(
       `INSERT INTO legends (name, anecdote, category, image_url, approved)
@@ -212,8 +213,9 @@ export const approveLegend = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    // MySQL attend 1 au lieu de true
     await query(
-      'UPDATE legends SET approved = true WHERE id = ?',
+      'UPDATE legends SET approved = 1 WHERE id = ?',
       [id]
     );
     
