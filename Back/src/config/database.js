@@ -33,7 +33,9 @@ pool.getConnection()
 export const query = async (text, params = []) => {
   const start = Date.now();
   try {
-    const [rows] = await pool.execute(text, params);
+    // Utiliser pool.query() au lieu de pool.execute() pour éviter les problèmes
+    // de prepared statements avec LIMIT/OFFSET sur certaines versions MySQL
+    const [rows] = await pool.query(text, params);
     const duration = Date.now() - start;
     console.log('Requête exécutée', { duration, affectedRows: rows.affectedRows || rows.length });
     return { rows: Array.isArray(rows) ? rows : [rows], rowCount: rows.affectedRows || rows.length };
