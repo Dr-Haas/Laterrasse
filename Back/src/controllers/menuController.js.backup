@@ -9,7 +9,7 @@ export const getCategories = async (req, res, next) => {
     const params = [];
 
     if (visible !== 'all') {
-      whereClause = 'WHERE visible = ?';
+      whereClause = 'WHERE visible = $1';
       params.push(visible === 'true');
     }
 
@@ -40,7 +40,7 @@ export const getFullMenu = async (req, res, next) => {
     const menuPromises = categoriesResult.rows.map(async (category) => {
       const itemsResult = await query(
         `SELECT * FROM menu_items
-         WHERE category_id = ? AND available = true
+         WHERE category_id = $1 AND available = true
          ORDER BY display_order ASC, name ASC`,
         [category.id]
       );
@@ -65,11 +65,11 @@ export const getItemsByCategory = async (req, res, next) => {
     const { categoryId } = req.params;
     const { available = 'true' } = req.query;
 
-    let whereClause = 'WHERE category_id = ?';
+    let whereClause = 'WHERE category_id = $1';
     const params = [categoryId];
 
     if (available !== 'all') {
-      whereClause += ' AND available = ?';
+      whereClause += ' AND available = $2';
       params.push(available === 'true');
     }
 
@@ -98,7 +98,7 @@ export const getItemById = async (req, res, next) => {
         mc.slug as category_slug
       FROM menu_items mi
       JOIN menu_categories mc ON mi.category_id = mc.id
-      WHERE mi.id = ?`,
+      WHERE mi.id = $1`,
       [id]
     );
 
@@ -123,8 +123,8 @@ export const createCategory = async (req, res, next) => {
 
     const result = await query(
       `INSERT INTO menu_categories (name, slug, description, icon, display_order)
-       VALUES (?, ?, ?, ?, ?)
-       `,
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
       [name, slug, description || null, icon || null, displayOrder || 0]
     );
 
@@ -159,8 +159,8 @@ export const createItem = async (req, res, next) => {
     const result = await query(
       `INSERT INTO menu_items 
        (category_id, name, description, badge, prices, image_url, allergens, display_order, popular)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-       `,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *`,
       [
         categoryId,
         name,
@@ -243,7 +243,7 @@ export const updateItem = async (req, res, next) => {
     values.push(id);
 
     const result = await query(
-      `UPDATE menu_items SET ${updates.join(', ')} WHERE id = $${paramCount} `,
+      `UPDATE menu_items SET ${updates.join(', ')} WHERE id = $${paramCount} RETURNING *`,
       values
     );
 
@@ -266,7 +266,7 @@ export const deleteItem = async (req, res, next) => {
     const { id } = req.params;
 
     const result = await query(
-      'DELETE FROM menu_items WHERE id = ? ',
+      'DELETE FROM menu_items WHERE id = $1 RETURNING *',
       [id]
     );
 

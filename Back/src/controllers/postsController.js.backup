@@ -10,7 +10,7 @@ export const getPosts = async (req, res, next) => {
     const params = [limit, offset];
     
     if (approved !== 'all') {
-      whereClause = 'WHERE p.approved = ?';
+      whereClause = 'WHERE p.approved = $3';
       params.push(approved === 'true');
     }
 
@@ -23,13 +23,13 @@ export const getPosts = async (req, res, next) => {
       JOIN users u ON p.user_id = u.id
       ${whereClause}
       ORDER BY p.created_at DESC
-      LIMIT ? OFFSET ?`,
+      LIMIT $1 OFFSET $2`,
       params
     );
 
     // Compter le total
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM posts p ${whereClause}`,
+      `SELECT COUNT(*) FROM posts p ${whereClause}`,
       approved !== 'all' ? [approved === 'true'] : []
     );
 
@@ -62,7 +62,7 @@ export const getPostById = async (req, res, next) => {
         u.id as user_id, u.username, u.email, u.avatar_url
       FROM posts p
       JOIN users u ON p.user_id = u.id
-      WHERE p.id = ?`,
+      WHERE p.id = $1`,
       [id]
     );
 
@@ -93,8 +93,8 @@ export const createPost = async (req, res, next) => {
 
     const result = await query(
       `INSERT INTO posts (user_id, message, image_url, approved)
-       VALUES (?, ?, ?, ?)
-       `,
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
       [userId, message, imageUrl, req.user.role === 'admin']
     );
 
@@ -102,7 +102,7 @@ export const createPost = async (req, res, next) => {
 
     // Récupérer les infos utilisateur
     const userResult = await query(
-      'SELECT id, username, email, avatar_url FROM users WHERE id = ?',
+      'SELECT id, username, email, avatar_url FROM users WHERE id = $1',
       [userId]
     );
 
@@ -125,7 +125,7 @@ export const updatePost = async (req, res, next) => {
 
     // Vérifier que le post appartient à l'utilisateur ou qu'il est admin
     const checkResult = await query(
-      'SELECT user_id FROM posts WHERE id = ?',
+      'SELECT user_id FROM posts WHERE id = $1',
       [id]
     );
 
@@ -138,7 +138,7 @@ export const updatePost = async (req, res, next) => {
     }
 
     const result = await query(
-      'UPDATE posts SET message = ? WHERE id = ? ',
+      'UPDATE posts SET message = $1 WHERE id = $2 RETURNING *',
       [message, id]
     );
 
@@ -155,7 +155,7 @@ export const deletePost = async (req, res, next) => {
 
     // Vérifier les permissions
     const checkResult = await query(
-      'SELECT user_id FROM posts WHERE id = ?',
+      'SELECT user_id FROM posts WHERE id = $1',
       [id]
     );
 
@@ -167,7 +167,7 @@ export const deletePost = async (req, res, next) => {
       return res.status(403).json({ error: 'Non autorisé' });
     }
 
-    await query('DELETE FROM posts WHERE id = ?', [id]);
+    await query('DELETE FROM posts WHERE id = $1', [id]);
 
     res.json({ message: 'Post supprimé avec succès' });
   } catch (error) {
@@ -181,7 +181,7 @@ export const approvePost = async (req, res, next) => {
     const { id } = req.params;
 
     const result = await query(
-      'UPDATE posts SET approved = true WHERE id = ? ',
+      'UPDATE posts SET approved = true WHERE id = $1 RETURNING *',
       [id]
     );
 
@@ -205,14 +205,14 @@ export const likePost = async (req, res, next) => {
     const userId = req.user.id;
 
     // Vérifier si le post existe
-    const postCheck = await query('SELECT id FROM posts WHERE id = ?', [id]);
+    const postCheck = await query('SELECT id FROM posts WHERE id = $1', [id]);
     if (postCheck.rows.length === 0) {
       return res.status(404).json({ error: 'Post introuvable' });
     }
 
     // Vérifier si déjà liké
     const likeCheck = await query(
-      'SELECT id FROM likes WHERE user_id = ? AND post_id = ?',
+      'SELECT id FROM likes WHERE user_id = $1 AND post_id = $2',
       [userId, id]
     );
 
@@ -222,7 +222,7 @@ export const likePost = async (req, res, next) => {
 
     // Créer le like
     await query(
-      'INSERT INTO likes (user_id, post_id) VALUES (?, ?)',
+      'INSERT INTO likes (user_id, post_id) VALUES ($1, $2)',
       [userId, id]
     );
 
@@ -239,7 +239,7 @@ export const unlikePost = async (req, res, next) => {
     const userId = req.user.id;
 
     const result = await query(
-      'DELETE FROM likes WHERE user_id = ? AND post_id = ? ',
+      'DELETE FROM likes WHERE user_id = $1 AND post_id = $2 RETURNING *',
       [userId, id]
     );
 

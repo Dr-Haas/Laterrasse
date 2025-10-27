@@ -7,24 +7,24 @@ export const getLegends = async (req, res, next) => {
     const offset = (page - 1) * limit;
 
     let whereConditions = [];
-    const params = [];
+    const params = [limit, offset];
+    let paramCount = 2;
 
     if (approved !== 'all') {
-      whereConditions.push(`approved = ?`);
+      paramCount++;
+      whereConditions.push(`approved = $${paramCount}`);
       params.push(approved === 'true');
     }
 
     if (category !== 'all' && ['mangeur', 'fidele', 'drole', 'ambassadeur', 'autre'].includes(category)) {
-      whereConditions.push(`category = ?`);
+      paramCount++;
+      whereConditions.push(`category = $${paramCount}`);
       params.push(category);
     }
 
     const whereClause = whereConditions.length > 0 
       ? 'WHERE ' + whereConditions.join(' AND ')
       : '';
-    
-    // Ajouter limit et offset à la fin
-    params.push(parseInt(limit), parseInt(offset));
 
     const result = await query(
       `SELECT 
@@ -32,14 +32,14 @@ export const getLegends = async (req, res, next) => {
       FROM legends
       ${whereClause}
       ORDER BY votes_count DESC, created_at DESC
-      LIMIT ? OFFSET ?`,
+      LIMIT $1 OFFSET $2`,
       params
     );
 
     // Compter le total
-    const countParams = params.slice(0, whereConditions.length); // Seulement les conditions WHERE
+    const countParams = params.slice(2);
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM legends ${whereClause}`,
+      `SELECT COUNT(*) FROM legends ${whereClause}`,
       countParams
     );
 
@@ -66,7 +66,7 @@ export const getLegendById = async (req, res, next) => {
     const { id } = req.params;
 
     const result = await query(
-      'SELECT * FROM legends WHERE id = ?',
+      'SELECT * FROM legends WHERE id = $1',
       [id]
     );
 
@@ -108,22 +108,14 @@ export const createLegend = async (req, res, next) => {
 
     const result = await query(
       `INSERT INTO legends (name, anecdote, category, image_url, approved)
-       VALUES (?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
       [name.trim(), anecdote.trim(), category, imageUrl, approved]
-    );
-
-    // MySQL: récupérer l'ID inséré
-    const insertId = result.rows.insertId;
-    
-    // Récupérer la légende créée
-    const legendResult = await query(
-      'SELECT * FROM legends WHERE id = ?',
-      [insertId]
     );
 
     res.status(201).json({
       message: 'Légende créée',
-      data: legendResult.rows[0]
+      data: result.rows[0]
     });
   } catch (error) {
     next(error);
@@ -138,14 +130,17 @@ export const updateLegend = async (req, res, next) => {
 
     const updates = [];
     const values = [];
+    let paramCount = 0;
 
     if (name) {
-      updates.push(`name = ?`);
+      paramCount++;
+      updates.push(`name = $${paramCount}`);
       values.push(name.trim());
     }
 
     if (anecdote) {
-      updates.push(`anecdote = ?`);
+      paramCount++;
+      updates.push(`anecdote = $${paramCount}`);
       values.push(anecdote.trim());
     }
 
@@ -153,7 +148,8 @@ export const updateLegend = async (req, res, next) => {
       if (!['mangeur', 'fidele', 'drole', 'ambassadeur', 'autre'].includes(category)) {
         return res.status(400).json({ error: 'Catégorie invalide' });
       }
-      updates.push(`category = ?`);
+      paramCount++;
+      updates.push(`category = $${paramCount}`);
       values.push(category);
     }
 
@@ -161,17 +157,12 @@ export const updateLegend = async (req, res, next) => {
       return res.status(400).json({ error: 'Aucune mise à jour fournie' });
     }
 
+    paramCount++;
     values.push(id);
 
-    await query(
-      `UPDATE legends SET ${updates.join(', ')} WHERE id = ?`,
-      values
-    );
-
-    // Récupérer la légende mise à jour
     const result = await query(
-      'SELECT * FROM legends WHERE id = ?',
-      [id]
+      `UPDATE legends SET ${updates.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+      values
     );
 
     if (result.rows.length === 0) {
@@ -193,11 +184,11 @@ export const deleteLegend = async (req, res, next) => {
     const { id } = req.params;
 
     const result = await query(
-      'DELETE FROM legends WHERE id = ?',
+      'DELETE FROM legends WHERE id = $1 RETURNING *',
       [id]
     );
 
-    if (result.rowCount === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Légende introuvable' });
     }
 
@@ -212,14 +203,8 @@ export const approveLegend = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    await query(
-      'UPDATE legends SET approved = true WHERE id = ?',
-      [id]
-    );
-    
-    // Récupérer la légende approuvée
     const result = await query(
-      'SELECT * FROM legends WHERE id = ?',
+      'UPDATE legends SET approved = true WHERE id = $1 RETURNING *',
       [id]
     );
 
@@ -241,14 +226,8 @@ export const voteLegend = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    await query(
-      'UPDATE legends SET votes_count = votes_count + 1 WHERE id = ?',
-      [id]
-    );
-    
-    // Récupérer la légende mise à jour
     const result = await query(
-      'SELECT * FROM legends WHERE id = ?',
+      'UPDATE legends SET votes_count = votes_count + 1 WHERE id = $1 RETURNING *',
       [id]
     );
 
