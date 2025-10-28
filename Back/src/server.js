@@ -32,6 +32,7 @@ const allowedOrigins = [
   'http://localhost:3000', 
   'http://localhost:3434',          // Frontend local
   'https://laterrasse.dikio.fr',     // Frontend production
+  'http://laterrasse.dikio.fr',
   process.env.FRONTEND_URL           // Variable d'environnement custom
 ].filter(Boolean); // Retire les valeurs null/undefined
 
