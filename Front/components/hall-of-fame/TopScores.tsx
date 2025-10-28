@@ -121,8 +121,8 @@ export function TopScores() {
               >
                 <div className="grid grid-cols-12 gap-4 items-center">
                   {/* Rang */}
-                  <div className="col-span-1 text-center">
-                    <span className="text-3xl md:text-4xl">
+                  <div className="col-span-1 text-center" >
+                    <span className="text-3xl md:text-4xl" style={{padding: "10px 0"}}>
                       {index < 3 ? medalEmojis[index] : `#${index + 1}`}
                     </span>
                   </div>

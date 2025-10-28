@@ -4,6 +4,7 @@
   "/carte/page": "/carte",
   "/favicon.ico/route": "/favicon.ico",
   "/galerie/page": "/galerie",
+  "/hall-of-fame/page": "/hall-of-fame",
   "/jeu/page": "/jeu",
   "/page": "/"
 }

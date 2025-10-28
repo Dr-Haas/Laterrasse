@@ -41,6 +41,7 @@ export function HallOfFameHero() {
 
           {/* Sous-titre */}
           <motion.p
+            style={{padding: "10px 0"}}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -50,6 +51,7 @@ export function HallOfFameHero() {
           </motion.p>
 
           <motion.p
+            style={{padding: "10px 0"}}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
